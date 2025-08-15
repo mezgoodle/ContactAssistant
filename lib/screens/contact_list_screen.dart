@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:contact_assistant/screens/contact_detail_screen.dart';
 
 class ContactListScreen extends StatefulWidget {
   const ContactListScreen({super.key});
@@ -18,6 +19,9 @@ class _ContactListScreenState extends State<ContactListScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           debugPrint('Floating Action Button Pressed');
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return const ContactDetailScreen();
+          }));
         },
         tooltip: 'Add note',
         child: const Icon(Icons.add, color: Colors.white, size: 30.0),
