@@ -1,23 +1,36 @@
 import 'package:flutter/material.dart';
 
 class ContactDetailScreen extends StatefulWidget {
-  const ContactDetailScreen({super.key});
+  String title;
+
+  ContactDetailScreen(this.title, {super.key});
 
   @override
-  State<ContactDetailScreen> createState() => _ContactDetailScreenState();
+  State<ContactDetailScreen> createState() =>
+      _ContactDetailScreenState(this.title);
 }
 
 class _ContactDetailScreenState extends State<ContactDetailScreen> {
   static var _priorities = ["high", "medium", "low"];
 
+  String title;
+
   TextEditingController _titleController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
+
+  _ContactDetailScreenState(this.title);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contact Details'),
+        title: Text(title),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            moveToLastScreen();
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.only(top: 15.0, left: 10.0, right: 10.0),
@@ -103,5 +116,9 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
         ),
       ),
     );
+  }
+
+  void moveToLastScreen() {
+    Navigator.pop(context);
   }
 }

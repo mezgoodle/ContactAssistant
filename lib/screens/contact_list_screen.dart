@@ -19,9 +19,7 @@ class _ContactListScreenState extends State<ContactListScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           debugPrint('Floating Action Button Pressed');
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return const ContactDetailScreen();
-          }));
+          navigateToContactDetail('Add new contact');
         },
         tooltip: 'Add note',
         child: const Icon(Icons.add, color: Colors.white, size: 30.0),
@@ -46,10 +44,17 @@ class _ContactListScreenState extends State<ContactListScreen> {
             trailing: const Icon(Icons.delete, color: Colors.grey),
             onTap: () {
               debugPrint('Tapped on contact ${index + 1}');
+              navigateToContactDetail('Edit contact');
             },
           ),
         );
       },
     );
+  }
+
+  void navigateToContactDetail(String title) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return ContactDetailScreen(title);
+    }));
   }
 }
