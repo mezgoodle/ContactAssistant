@@ -1,30 +1,34 @@
 import 'package:flutter/material.dart';
 
 class ContactDetailScreen extends StatefulWidget {
-  String title;
+  final String title;
 
-  ContactDetailScreen(this.title, {super.key});
+  const ContactDetailScreen(this.title, {super.key});
 
   @override
-  State<ContactDetailScreen> createState() =>
-      _ContactDetailScreenState(this.title);
+  State<ContactDetailScreen> createState() => _ContactDetailScreenState();
 }
 
 class _ContactDetailScreenState extends State<ContactDetailScreen> {
-  static var _priorities = ["high", "medium", "low"];
+  static const List<String> _priorities = ["high", "medium", "low"];
 
-  String title;
+  String _selectedPriority = 'low';
 
-  TextEditingController _titleController = TextEditingController();
-  TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
-  _ContactDetailScreenState(this.title);
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -37,22 +41,24 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
         child: ListView(
           children: [
             ListTile(
-              title: DropdownButton(
+              title: DropdownButton<String>(
                   items: _priorities.map((String dropDownStringItem) {
                     return DropdownMenuItem<String>(
                       value: dropDownStringItem,
                       child: Text(dropDownStringItem),
                     );
                   }).toList(),
-                  value: 'low',
-                  onChanged: (value) {
+                  value: _selectedPriority,
+                  onChanged: (String? value) {
+                    if (value == null) return;
                     setState(() {
+                      _selectedPriority = value;
                       debugPrint('Selected priority: $value');
                     });
                   }),
             ),
             Padding(
-              padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+              padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
               child: TextField(
                 controller: _titleController,
                 onChanged: (value) {
@@ -67,11 +73,11 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+              padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
               child: TextField(
                 controller: _descriptionController,
                 onChanged: (value) {
-                  debugPrint('Title changed: $value');
+                  debugPrint('Description changed: $value');
                 },
                 decoration: InputDecoration(
                   labelText: 'Contact Description',
@@ -82,18 +88,15 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+              padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
               child: Row(
                 children: [
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        debugPrint('Save button pressed');
+                        debugPrint('Delete button pressed');
                       },
-                      child: const Text(
-                        'Delete',
-                        textScaleFactor: 1.5,
-                      ),
+                      child: const Text('Delete'),
                     ),
                   ),
                   Container(
@@ -102,12 +105,9 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                   Expanded(
                       child: ElevatedButton(
                     onPressed: () {
-                      debugPrint('Delet button pressed');
+                      debugPrint('Save button pressed');
                     },
-                    child: const Text(
-                      'Save',
-                      textScaleFactor: 1.5,
-                    ),
+                    child: const Text('Save'),
                   )),
                 ],
               ),

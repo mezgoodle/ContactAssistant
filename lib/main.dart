@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:contact_assistant/screens/contact_list_screen.dart';
-import 'package:contact_assistant/screens/contact_detail_screen.dart';
 
 void main() {
   runApp(const MainApp());

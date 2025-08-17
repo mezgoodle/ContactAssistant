@@ -21,7 +21,7 @@ class _ContactListScreenState extends State<ContactListScreen> {
           debugPrint('Floating Action Button Pressed');
           navigateToContactDetail('Add new contact');
         },
-        tooltip: 'Add note',
+        tooltip: 'Add contact',
         child: const Icon(Icons.add, color: Colors.white, size: 30.0),
       ),
     );
@@ -37,14 +37,14 @@ class _ContactListScreenState extends State<ContactListScreen> {
           child: ListTile(
             leading: const CircleAvatar(
               backgroundColor: Colors.yellow,
-              child: Icon(Icons.keyboard_arrow_left),
+              child: Icon(Icons.person),
             ),
             title: const Text('Dummy Title'),
             subtitle: const Text('Dummy Subtitle'),
             trailing: const Icon(Icons.delete, color: Colors.grey),
             onTap: () {
               debugPrint('Tapped on contact ${index + 1}');
-              navigateToContactDetail('Edit contact');
+              navigateToContactDetail('Edit contact ${index + 1}');
             },
           ),
         );
@@ -52,8 +52,8 @@ class _ContactListScreenState extends State<ContactListScreen> {
     );
   }
 
-  void navigateToContactDetail(String title) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
+  void navigateToContactDetail(String title) async {
+    await Navigator.push(context, MaterialPageRoute(builder: (context) {
       return ContactDetailScreen(title);
     }));
   }
