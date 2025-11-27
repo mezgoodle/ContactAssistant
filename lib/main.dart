@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:contact_assistant/core/router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:contact_assistant/data/models/contact.dart';
 
-void main() {
+void main() async {
+  await Hive.initFlutter();
+  Hive.registerAdapter(ContactAdapter());
+  Hive.registerAdapter(FollowUpFrequencyAdapter());
+  await Hive.openBox<Contact>('contacts');
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
