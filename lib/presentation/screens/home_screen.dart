@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:contact_assistant/data/models/contact.dart';
+
 import 'package:contact_assistant/logic/providers/contact_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -65,6 +65,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Personal CRM'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              context.push('/settings');
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

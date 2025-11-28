@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:contact_assistant/presentation/screens/home_screen.dart';
 import 'package:contact_assistant/presentation/screens/add_edit_contact_screen.dart';
 import 'package:contact_assistant/presentation/screens/contact_detail_screen.dart';
+import 'package:contact_assistant/presentation/screens/settings_screen.dart';
 import 'package:contact_assistant/data/models/contact.dart';
 
 final router = GoRouter(
@@ -29,6 +29,10 @@ final router = GoRouter(
         final contact = state.extra as Contact;
         return ContactDetailScreen(contact: contact);
       },
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
     ),
   ],
 );
