@@ -7,11 +7,17 @@ import 'package:contact_assistant/data/models/contact.dart';
 import 'package:contact_assistant/providers/theme_provider.dart';
 
 void main() async {
-  await Hive.initFlutter();
-  Hive.registerAdapter(ContactAdapter());
-  Hive.registerAdapter(FollowUpFrequencyAdapter());
-  await Hive.openBox<Contact>('contacts');
-  await Hive.openBox('settings');
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Hive.initFlutter();
+    Hive.registerAdapter(ContactAdapter());
+    Hive.registerAdapter(FollowUpFrequencyAdapter());
+    await Hive.openBox<Contact>('contacts');
+    await Hive.openBox('settings');
+  } catch (e) {
+    debugPrint('Hive initialization failed: $e');
+    return;
+  }
 
   runApp(const ProviderScope(child: MyApp()));
 }

@@ -4,6 +4,7 @@ import 'package:contact_assistant/presentation/screens/add_edit_contact_screen.d
 import 'package:contact_assistant/presentation/screens/contact_detail_screen.dart';
 import 'package:contact_assistant/presentation/screens/settings_screen.dart';
 import 'package:contact_assistant/data/models/contact.dart';
+import 'package:flutter/material.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -19,14 +20,26 @@ final router = GoRouter(
     GoRoute(
       path: '/edit_contact',
       builder: (context, state) {
-        final contact = state.extra as Contact;
+        final contact = state.extra;
+        if (contact is! Contact) {
+          return const Scaffold(
+            body: Center(
+                child: Text('Invalid navigation: Contact data required')),
+          );
+        }
         return AddEditContactScreen(contact: contact);
       },
     ),
     GoRoute(
       path: '/contact/:id',
       builder: (context, state) {
-        final contact = state.extra as Contact;
+        final contact = state.extra;
+        if (contact is! Contact) {
+          return const Scaffold(
+            body: Center(
+                child: Text('Invalid navigation: Contact data required')),
+          );
+        }
         return ContactDetailScreen(contact: contact);
       },
     ),

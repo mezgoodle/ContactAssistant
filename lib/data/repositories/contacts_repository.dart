@@ -44,6 +44,9 @@ class ContactsRepository {
     // Let's assume the UI or Logic sets it, or we set it here if empty.
     // But `id` is `late String`.
     // If we use `box.put(key, value)`, we can use the ID as the key.
+    if (contact.id.isEmpty) {
+      throw ArgumentError('Contact ID cannot be empty');
+    }
     if (contact.isInBox) {
       await contact.save();
     } else {
