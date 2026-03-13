@@ -13,9 +13,12 @@ class ContactDetailScreen extends ConsumerWidget {
   const ContactDetailScreen({super.key, required this.contact});
 
   Future<void> _launchUrl(String urlString) async {
-    final Uri url = Uri.parse(urlString);
+    final Uri? url = Uri.tryParse(urlString);
+    if (url == null) {
+      debugPrint('Invalid URL: $urlString');
+      return;
+    }
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      // Handle error (e.g., show snackbar)
       debugPrint('Could not launch $url');
     }
   }

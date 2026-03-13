@@ -21,12 +21,12 @@ class Contacts extends _$Contacts {
 
   Future<void> addContact(Contact contact) async {
     final repository = ref.read(contactsRepositoryProvider);
-    // Generate ID if empty (though UI might handle it, safer here)
-    if (contact.id.isEmpty) {
-      // Simple ID generation
-      contact.id = DateTime.now().millisecondsSinceEpoch.toString();
+    final contactToAdd = contact;
+    if (contactToAdd.id.isEmpty) {
+      contactToAdd.id =
+          '${DateTime.now().millisecondsSinceEpoch}_${contact.hashCode}';
     }
-    await repository.add(contact);
+    await repository.add(contactToAdd);
   }
 
   Future<void> updateContact(Contact contact) async {

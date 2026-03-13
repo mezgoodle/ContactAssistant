@@ -40,8 +40,9 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
         TextEditingController(text: widget.contact?.instagramHandle);
     _locationController = TextEditingController(text: widget.contact?.location);
     _notesController = TextEditingController(text: widget.contact?.notes);
-    _tagsController =
-        TextEditingController(text: widget.contact?.tags.join(', '));
+    _tagsController = TextEditingController(
+      text: (widget.contact?.tags ?? []).join(', '),
+    );
     _lastContacted = widget.contact?.lastContacted;
     _frequency = widget.contact?.followUpFrequency ?? FollowUpFrequency.none;
   }
