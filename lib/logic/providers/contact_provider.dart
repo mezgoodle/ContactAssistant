@@ -1,14 +1,14 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:contact_assistant/data/models/contact.dart';
 import 'package:contact_assistant/data/repositories/contacts_repository.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 part 'contact_provider.g.dart';
 
 @riverpod
 ContactsRepository contactsRepository(ContactsRepositoryRef ref) {
-  final box = Hive.box<Contact>('contacts');
-  return ContactsRepository(box);
+  final repo = ContactsRepository();
+  ref.onDispose(repo.dispose);
+  return repo;
 }
 
 @riverpod
@@ -21,11 +21,11 @@ class Contacts extends _$Contacts {
 
   Future<void> addContact(Contact contact) async {
     final repository = ref.read(contactsRepositoryProvider);
-    final contactToAdd = contact;
-    if (contactToAdd.id.isEmpty) {
-      contactToAdd.id =
-          '${DateTime.now().millisecondsSinceEpoch}_${contact.hashCode}';
-    }
+    final contactToAdd = contact.id.isEmpty
+        ? contact.copyWith(
+            id: '${DateTime.now().millisecondsSinceEpoch}_${contact.hashCode}',
+          )
+        : contact;
     await repository.add(contactToAdd);
   }
 
@@ -41,7 +41,6 @@ class Contacts extends _$Contacts {
 
   Future<void> markAsContacted(Contact contact) async {
     final repository = ref.read(contactsRepositoryProvider);
-    contact.lastContacted = DateTime.now();
-    await repository.update(contact);
+    await repository.update(contact.copyWith(lastContacted: DateTime.now()));
   }
 }

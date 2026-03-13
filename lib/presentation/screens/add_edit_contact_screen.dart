@@ -101,20 +101,21 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
           .where((e) => e.isNotEmpty)
           .toList();
 
-      final contact = Contact()
-        ..name = name
-        ..phoneNumber = phone
-        ..email = email
-        ..telegramHandle = telegram
-        ..instagramHandle = instagram
-        ..location = location
-        ..notes = notes
-        ..lastContacted = _lastContacted
-        ..followUpFrequency = _frequency
-        ..tags = tags;
+      final contact = Contact(
+        id: widget.contact?.id ?? '',
+        name: name,
+        phoneNumber: phone,
+        email: email,
+        telegramHandle: telegram,
+        instagramHandle: instagram,
+        location: location,
+        notes: notes,
+        lastContacted: _lastContacted,
+        followUpFrequency: _frequency,
+        tags: tags,
+      );
 
       if (widget.contact != null) {
-        contact.id = widget.contact!.id;
         ref.read(contactsProvider.notifier).updateContact(contact);
       } else {
         ref.read(contactsProvider.notifier).addContact(contact);

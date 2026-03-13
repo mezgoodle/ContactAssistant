@@ -1,29 +1,15 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsRepository {
-  static const String _boxName = 'settings';
   static const String _themeKey = 'theme_mode';
 
-  Box? _box;
-
-  Future<void> init() async {
-    if (_box == null || !_box!.isOpen) {
-      _box = await Hive.openBox(_boxName);
-    }
-  }
-
-  Box get box {
-    if (_box == null || !_box!.isOpen) {
-      throw HiveError('Settings box is not open');
-    }
-    return _box!;
-  }
-
-  String getThemeMode() {
-    return box.get(_themeKey, defaultValue: 'system');
+  Future<String> getThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_themeKey) ?? 'system';
   }
 
   Future<void> setThemeMode(String mode) async {
-    await box.put(_themeKey, mode);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_themeKey, mode);
   }
 }

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:contact_assistant/core/router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:contact_assistant/data/models/contact.dart';
-
+import 'package:contact_assistant/core/utils/mongodb_service.dart';
 import 'package:contact_assistant/providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: '.env');
+
+  // Connect to MongoDB Atlas
   try {
-    await Hive.initFlutter();
-    Hive.registerAdapter(ContactAdapter());
-    Hive.registerAdapter(FollowUpFrequencyAdapter());
-    await Hive.openBox<Contact>('contacts');
-    await Hive.openBox('settings');
+    await MongoDbService().connect();
   } catch (e) {
-    debugPrint('Hive initialization failed: $e');
+    debugPrint('MongoDB connection failed: $e');
     return;
   }
 

@@ -7,7 +7,7 @@ part of 'contact_provider.dart';
 // **************************************************************************
 
 String _$contactsRepositoryHash() =>
-    r'c2fced4c090ac1518227550876005c8e21b24ce6';
+    r'7dcb9b89eae32296314d926a7555a0988563b5a1';
 
 /// See also [contactsRepository].
 @ProviderFor(contactsRepository)
@@ -23,7 +23,7 @@ final contactsRepositoryProvider =
 );
 
 typedef ContactsRepositoryRef = AutoDisposeProviderRef<ContactsRepository>;
-String _$contactsHash() => r'4cae48ccce2641a994acda948a6d6585c148250f';
+String _$contactsHash() => r'208a08aeee4872f0b0d43c0276b1f34b2c219de0';
 
 /// See also [Contacts].
 @ProviderFor(Contacts)

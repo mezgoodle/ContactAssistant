@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:contact_assistant/data/repositories/settings_repository.dart';
 
 part 'theme_provider.g.dart';
@@ -12,14 +11,14 @@ class ThemeNotifier extends _$ThemeNotifier {
   @override
   ThemeMode build() {
     _repository = SettingsRepository();
+    // Load theme asynchronously; default to system until resolved.
+    _loadTheme();
+    return ThemeMode.system;
+  }
 
-    try {
-      final modeStr =
-          Hive.box('settings').get('theme_mode', defaultValue: 'system');
-      return _parseThemeMode(modeStr);
-    } catch (e) {
-      return ThemeMode.system;
-    }
+  Future<void> _loadTheme() async {
+    final modeStr = await _repository.getThemeMode();
+    state = _parseThemeMode(modeStr);
   }
 
   ThemeMode _parseThemeMode(String mode) {
@@ -47,7 +46,6 @@ class ThemeNotifier extends _$ThemeNotifier {
 
   Future<void> setTheme(ThemeMode mode) async {
     state = mode;
-    await _repository.init();
     await _repository.setThemeMode(_themeModeToString(mode));
   }
 }
