@@ -39,9 +39,21 @@ class ContactsRepository {
   }
 
   Future<void> update(Contact contact) async {
-    await _collection.replaceOne(
+    // replaceOne with $set — must NOT include _id in the update doc
+    final doc = Map<String, dynamic>.from(contact.toJson())..remove('_id');
+    await _collection.updateOne(
       where.eq('_id', contact.id),
-      contact.toJson(),
+      modify
+          .set('name', doc['name'])
+          .set('phoneNumber', doc['phoneNumber'])
+          .set('email', doc['email'])
+          .set('telegramHandle', doc['telegramHandle'])
+          .set('instagramHandle', doc['instagramHandle'])
+          .set('location', doc['location'])
+          .set('notes', doc['notes'])
+          .set('lastContacted', doc['lastContacted'])
+          .set('followUpFrequency', doc['followUpFrequency'])
+          .set('tags', doc['tags']),
     );
     await _notifyListeners();
   }
