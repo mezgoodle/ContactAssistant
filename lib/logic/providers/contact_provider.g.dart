@@ -7,7 +7,7 @@ part of 'contact_provider.dart';
 // **************************************************************************
 
 String _$contactsRepositoryHash() =>
-    r'7dcb9b89eae32296314d926a7555a0988563b5a1';
+    r'f684ca6cf9947ebbad671101ca045fea82a069aa';
 
 /// See also [contactsRepository].
 @ProviderFor(contactsRepository)
@@ -23,12 +23,12 @@ final contactsRepositoryProvider =
 );
 
 typedef ContactsRepositoryRef = AutoDisposeProviderRef<ContactsRepository>;
-String _$contactsHash() => r'208a08aeee4872f0b0d43c0276b1f34b2c219de0';
+String _$contactsHash() => r'04b154c58d522f42b479bf2300e8d44a0760faaf';
 
 /// See also [Contacts].
 @ProviderFor(Contacts)
 final contactsProvider =
-    AutoDisposeStreamNotifierProvider<Contacts, List<Contact>>.internal(
+    AutoDisposeAsyncNotifierProvider<Contacts, List<Contact>>.internal(
   Contacts.new,
   name: r'contactsProvider',
   debugGetCreateSourceHash:
@@ -37,6 +37,6 @@ final contactsProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$Contacts = AutoDisposeStreamNotifier<List<Contact>>;
+typedef _$Contacts = AutoDisposeAsyncNotifier<List<Contact>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

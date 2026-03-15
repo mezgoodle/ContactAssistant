@@ -6,17 +6,15 @@ part 'contact_provider.g.dart';
 
 @riverpod
 ContactsRepository contactsRepository(ContactsRepositoryRef ref) {
-  final repo = ContactsRepository();
-  ref.onDispose(repo.dispose);
-  return repo;
+  return ContactsRepository();
 }
 
 @riverpod
 class Contacts extends _$Contacts {
   @override
-  Stream<List<Contact>> build() {
+  Future<List<Contact>> build() {
     final repository = ref.watch(contactsRepositoryProvider);
-    return repository.watchAll();
+    return repository.getAll();
   }
 
   Future<void> addContact(Contact contact) async {
@@ -27,20 +25,24 @@ class Contacts extends _$Contacts {
           )
         : contact;
     await repository.add(contactToAdd);
+    ref.invalidateSelf();
   }
 
   Future<void> updateContact(Contact contact) async {
     final repository = ref.read(contactsRepositoryProvider);
     await repository.update(contact);
+    ref.invalidateSelf();
   }
 
   Future<void> deleteContact(String id) async {
     final repository = ref.read(contactsRepositoryProvider);
     await repository.delete(id);
+    ref.invalidateSelf();
   }
 
   Future<void> markAsContacted(Contact contact) async {
     final repository = ref.read(contactsRepositoryProvider);
     await repository.update(contact.copyWith(lastContacted: DateTime.now()));
+    ref.invalidateSelf();
   }
 }
