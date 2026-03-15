@@ -122,7 +122,8 @@ class ContactDetailScreen extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.phone),
               title: Text(currentContact.phoneNumber!),
-              onTap: () => _launchUrl('tel:${currentContact.phoneNumber}'),
+              onTap: () => _launchUrl(
+                  'tel:${Uri.encodeComponent(currentContact.phoneNumber!)}'),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             ),
           if (currentContact.email != null)

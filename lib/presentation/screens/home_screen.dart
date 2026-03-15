@@ -51,7 +51,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               onChanged: (value) {
                 setState(() {
-                  _searchQuery = value.toLowerCase();
+                  _searchQuery = value.trim().toLowerCase();
                 });
               },
             ),

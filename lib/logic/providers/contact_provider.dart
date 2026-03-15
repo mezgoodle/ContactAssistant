@@ -1,3 +1,4 @@
+import 'package:mongo_dart/mongo_dart.dart' show ObjectId;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:contact_assistant/data/models/contact.dart';
 import 'package:contact_assistant/data/repositories/contacts_repository.dart';
@@ -20,9 +21,7 @@ class Contacts extends _$Contacts {
   Future<void> addContact(Contact contact) async {
     final repository = ref.read(contactsRepositoryProvider);
     final contactToAdd = contact.id.isEmpty
-        ? contact.copyWith(
-            id: '${DateTime.now().millisecondsSinceEpoch}_${contact.hashCode}',
-          )
+        ? contact.copyWith(id: ObjectId().oid)
         : contact;
     await repository.add(contactToAdd);
     ref.invalidateSelf();

@@ -9,13 +9,27 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Load environment variables
-  await dotenv.load(fileName: '.env');
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    debugPrint('Failed to load environment variables: $e');
+    return;
+  }
 
   // Connect to MongoDB Atlas
   try {
     await MongoDbService().connect();
   } catch (e) {
     debugPrint('MongoDB connection failed: $e');
+    runApp(const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text(
+            'Failed to connect. Please check your connection and restart.',
+          ),
+        ),
+      ),
+    ));
     return;
   }
 
