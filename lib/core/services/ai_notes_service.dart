@@ -14,46 +14,20 @@ class AiNotesService {
       "You are an expert networking assistant trained in Keith Ferrazzi's "
       "'Never Eat Alone' methodology. Analyze the raw notes provided by the "
       "user and extract key relationship-building details into each category. "
+      "Return a JSON object with keys: 'family_and_personal' (string), "
+      "'passions_and_hobbies' (array of strings), 'professional_goals' (string), "
+      "'preferences' (string), 'actionable_help' (string). "
       "If information for a field is missing or cannot be inferred, leave it "
       "as an empty string or, for list fields, an empty list.";
 
   late final GenerativeModel _model;
 
   AiNotesService() {
-    final schema = Schema.object(
-      properties: {
-        'family_and_personal': Schema.string(
-          description: 'Spouse, kids, hometown, personal life details.',
-          nullable: true,
-        ),
-        'passions_and_hobbies': Schema.array(
-          items: Schema.string(),
-          description:
-              "What lights their 'Blue Flame'? Hobbies, sports, passions.",
-          nullable: true,
-        ),
-        'professional_goals': Schema.string(
-          description: 'Current projects, career ambitions, challenges.',
-          nullable: true,
-        ),
-        'preferences': Schema.string(
-          description: 'Favorite food, drinks, sports teams, quirks.',
-          nullable: true,
-        ),
-        'actionable_help': Schema.string(
-          description:
-              'How I can uniquely help them or provide value right now.',
-          nullable: true,
-        ),
-      },
-    );
-
     _model = FirebaseAI.googleAI().generativeModel(
       model: 'gemini-2.5-flash',
       systemInstruction: Content.system(_systemInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
-        responseSchema: schema,
       ),
     );
   }
@@ -70,20 +44,21 @@ class AiNotesService {
 
     final Map<String, dynamic> data =
         jsonDecode(jsonText) as Map<String, dynamic>;
+    final profile = FerrazziProfile.fromJson(data);
 
-    return _formatMarkdown(data);
+    return _formatMarkdown(profile);
   }
 
-  String _formatMarkdown(Map<String, dynamic> data) {
+  String _formatMarkdown(FerrazziProfile profile) {
     final buffer = StringBuffer();
 
-    final family = (data['family_and_personal'] as String? ?? '').trim();
+    final family = profile.family.trim();
     buffer.writeln('## 👨‍👩‍👧 Family & Personal');
     buffer.writeln(family.isNotEmpty ? family : '_No information available._');
     buffer.writeln();
 
-    final hobbies = (data['passions_and_hobbies'] as List<dynamic>? ?? [])
-        .map((e) => e.toString().trim())
+    final hobbies = profile.passions
+        .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
         .toList();
     buffer.writeln('## 🔥 Passions & Hobbies');
@@ -96,20 +71,49 @@ class AiNotesService {
     }
     buffer.writeln();
 
-    final goals = (data['professional_goals'] as String? ?? '').trim();
+    final goals = profile.goals.trim();
     buffer.writeln('## 💼 Professional Goals');
     buffer.writeln(goals.isNotEmpty ? goals : '_No information available._');
     buffer.writeln();
 
-    final prefs = (data['preferences'] as String? ?? '').trim();
+    final prefs = profile.preferences.trim();
     buffer.writeln('## ☕ Preferences');
     buffer.writeln(prefs.isNotEmpty ? prefs : '_No information available._');
     buffer.writeln();
 
-    final help = (data['actionable_help'] as String? ?? '').trim();
+    final help = profile.actionableHelp.trim();
     buffer.writeln('## 🎯 Actionable Help');
     buffer.writeln(help.isNotEmpty ? help : '_No information available._');
 
     return buffer.toString().trim();
+  }
+}
+
+class FerrazziProfile {
+  final String family;
+  final List<String> passions;
+  final String goals;
+  final String preferences;
+  final String actionableHelp;
+
+  FerrazziProfile({
+    required this.family,
+    required this.passions,
+    required this.goals,
+    required this.preferences,
+    required this.actionableHelp,
+  });
+
+  factory FerrazziProfile.fromJson(Map<String, dynamic> json) {
+    return FerrazziProfile(
+      family: json['family_and_personal'] ?? '',
+      passions: (json['passions_and_hobbies'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      goals: json['professional_goals'] ?? '',
+      preferences: json['preferences'] ?? '',
+      actionableHelp: json['actionable_help'] ?? '',
+    );
   }
 }
