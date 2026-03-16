@@ -49,7 +49,7 @@ class AiNotesService {
     );
 
     _model = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       systemInstruction: Content.system(_systemInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
