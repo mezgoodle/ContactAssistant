@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:contact_assistant/data/models/contact.dart';
 import 'package:contact_assistant/logic/providers/contact_provider.dart';
+import 'package:contact_assistant/core/services/ai_notes_service.dart';
 
 class AddEditContactScreen extends ConsumerStatefulWidget {
   final Contact? contact;
@@ -27,6 +28,7 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
   late TextEditingController _tagsController;
   DateTime? _lastContacted;
   FollowUpFrequency _frequency = FollowUpFrequency.none;
+  bool _isEnhancingNotes = false;
 
   @override
   void initState() {
@@ -71,6 +73,33 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
       setState(() {
         _lastContacted = picked;
       });
+    }
+  }
+
+  Future<void> _enhanceNotes() async {
+    final raw = _notesController.text.trim();
+    if (raw.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter some notes before enhancing.'),
+        ),
+      );
+      return;
+    }
+    setState(() => _isEnhancingNotes = true);
+    try {
+      final enhanced = await AiNotesService().enhanceNotes(raw);
+      setState(() {
+        _notesController.text = enhanced;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('AI enhancement failed: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isEnhancingNotes = false);
     }
   }
 
@@ -232,13 +261,38 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                   prefixIcon: Icon(Icons.label)),
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _notesController,
-              decoration: const InputDecoration(
-                  labelText: 'Notes',
-                  prefixIcon: Icon(Icons.note),
-                  alignLabelWithHint: true),
-              maxLines: 5,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Notes',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    _isEnhancingNotes
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.auto_awesome),
+                            tooltip: 'Enhance with AI (Ferrazzi method)',
+                            onPressed: _enhanceNotes,
+                          ),
+                  ],
+                ),
+                TextFormField(
+                  controller: _notesController,
+                  decoration: const InputDecoration(
+                      labelText: 'Notes',
+                      prefixIcon: Icon(Icons.note),
+                      alignLabelWithHint: true),
+                  maxLines: 5,
+                ),
+              ],
             ),
           ],
         ),
