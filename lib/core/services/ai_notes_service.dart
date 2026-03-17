@@ -53,37 +53,37 @@ class AiNotesService {
     final buffer = StringBuffer();
 
     final family = profile.family.trim();
-    buffer.writeln('## 👨‍👩‍👧 Family & Personal');
-    buffer.writeln(family.isNotEmpty ? family : '_No information available._');
+    buffer.writeln('👨‍👩‍👧 Family & Personal');
+    buffer.writeln(family.isNotEmpty ? family : 'No information available.');
     buffer.writeln();
 
     final hobbies = profile.passions
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
         .toList();
-    buffer.writeln('## 🔥 Passions & Hobbies');
+    buffer.writeln('🔥 Passions & Hobbies');
     if (hobbies.isNotEmpty) {
       for (final item in hobbies) {
         buffer.writeln('- $item');
       }
     } else {
-      buffer.writeln('_No information available._');
+      buffer.writeln('No information available.');
     }
     buffer.writeln();
 
     final goals = profile.goals.trim();
-    buffer.writeln('## 💼 Professional Goals');
-    buffer.writeln(goals.isNotEmpty ? goals : '_No information available._');
+    buffer.writeln('💼 Professional Goals');
+    buffer.writeln(goals.isNotEmpty ? goals : 'No information available.');
     buffer.writeln();
 
     final prefs = profile.preferences.trim();
-    buffer.writeln('## ☕ Preferences');
-    buffer.writeln(prefs.isNotEmpty ? prefs : '_No information available._');
+    buffer.writeln('☕ Preferences');
+    buffer.writeln(prefs.isNotEmpty ? prefs : 'No information available.');
     buffer.writeln();
 
     final help = profile.actionableHelp.trim();
-    buffer.writeln('## 🎯 Actionable Help');
-    buffer.writeln(help.isNotEmpty ? help : '_No information available._');
+    buffer.writeln('🎯 Actionable Help');
+    buffer.writeln(help.isNotEmpty ? help : 'No information available.');
 
     return buffer.toString().trim();
   }
