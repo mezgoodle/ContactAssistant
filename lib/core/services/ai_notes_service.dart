@@ -17,15 +17,30 @@ class AiNotesService {
       "Return a JSON object with keys: 'family_and_personal' (string), "
       "'passions_and_hobbies' (array of strings), 'professional_goals' (string), "
       "'preferences' (string), 'actionable_help' (string). "
-      "If information for a field is missing or cannot be inferred, leave it "
       "as an empty string or, for list fields, an empty list.";
 
+  static const String _networkingInstruction =
+      "You are Keith Ferrazzi. Based on the provided contact profile, generate 3 "
+      "high-impact, open-ended 'Icebreaker' or 'Deepening' questions. These questions "
+      "should show genuine interest in the person's 'Blue Flame' (passions), family, "
+      "and professional goals. Avoid small talk; aim for questions that lead to an "
+      "emotional connection or offer a chance to be helpful. Respond in Ukrainian. "
+      "Return a JSON object with a key 'questions' containing a list of strings.";
+
   late final GenerativeModel _model;
+  late final GenerativeModel _networkingModel;
 
   AiNotesService() {
     _model = FirebaseAI.googleAI().generativeModel(
       model: 'gemini-2.5-flash',
       systemInstruction: Content.system(_systemInstruction),
+      generationConfig: GenerationConfig(
+        responseMimeType: 'application/json',
+      ),
+    );
+    _networkingModel = FirebaseAI.googleAI().generativeModel(
+      model: 'gemini-2.5-flash',
+      systemInstruction: Content.system(_networkingInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
       ),
@@ -87,6 +102,22 @@ class AiNotesService {
 
     return buffer.toString().trim();
   }
+
+  /// Generates 3 networking questions based on the Ferrazzi methodology.
+  Future<List<String>> generateNetworkingQuestions(FerrazziProfile profile) async {
+    final response = await _networkingModel.generateContent([
+      Content.text(jsonEncode(profile.toJson())),
+    ]);
+
+    final jsonText = response.text;
+    if (jsonText == null || jsonText.trim().isEmpty) {
+      throw Exception('Gemini returned an empty response.');
+    }
+
+    final Map<String, dynamic> data = jsonDecode(jsonText) as Map<String, dynamic>;
+    final List<dynamic> questions = data['questions'] ?? [];
+    return questions.map((e) => e.toString()).toList();
+  }
 }
 
 class FerrazziProfile {
@@ -114,6 +145,61 @@ class FerrazziProfile {
       goals: json['professional_goals'] ?? '',
       preferences: json['preferences'] ?? '',
       actionableHelp: json['actionable_help'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'family_and_personal': family,
+      'passions_and_hobbies': passions,
+      'professional_goals': goals,
+      'preferences': preferences,
+      'actionable_help': actionableHelp,
+    };
+  }
+
+  factory FerrazziProfile.fromMarkdown(String markdown) {
+    String extractSection(String title) {
+      final startIndex = markdown.indexOf(title);
+      if (startIndex == -1) return '';
+      final contentStart = markdown.indexOf('\n', startIndex);
+      if (contentStart == -1) return '';
+      int endIndex = markdown.length;
+      final sections = [
+        '👨‍👩‍👧 Family & Personal',
+        '🔥 Passions & Hobbies',
+        '💼 Professional Goals',
+        '☕ Preferences',
+        '🎯 Actionable Help'
+      ];
+      for (final section in sections) {
+        if (section == title) continue;
+        final index = markdown.indexOf(section, contentStart + 1);
+        if (index != -1 && index < endIndex) {
+          endIndex = index;
+        }
+      }
+      return markdown.substring(contentStart + 1, endIndex).trim();
+    }
+
+    final family = extractSection('👨‍👩‍👧 Family & Personal');
+    final hobbiesText = extractSection('🔥 Passions & Hobbies');
+    final goals = extractSection('💼 Professional Goals');
+    final prefs = extractSection('☕ Preferences');
+    final help = extractSection('🎯 Actionable Help');
+
+    final passions = hobbiesText
+        .split('\n')
+        .map((e) => e.replaceAll(RegExp(r'^- '), '').trim())
+        .where((e) => e.isNotEmpty && e != 'No information available.')
+        .toList();
+
+    return FerrazziProfile(
+      family: family == 'No information available.' ? '' : family,
+      passions: passions,
+      goals: goals == 'No information available.' ? '' : goals,
+      preferences: prefs == 'No information available.' ? '' : prefs,
+      actionableHelp: help == 'No information available.' ? '' : help,
     );
   }
 }
