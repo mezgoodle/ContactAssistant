@@ -10,7 +10,6 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -27,7 +26,6 @@ void main() async {
     return;
   }
 
-  // Load environment variables
   try {
     await dotenv.load(fileName: '.env');
   } catch (e) {
@@ -35,7 +33,6 @@ void main() async {
     return;
   }
 
-  // Connect to MongoDB Atlas
   try {
     await MongoDbService().connect();
   } catch (e) {

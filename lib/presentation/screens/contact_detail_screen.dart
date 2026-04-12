@@ -26,11 +26,8 @@ class ContactDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch the specific contact to get updates
     final contactsAsync = ref.watch(contactsProvider);
 
-    // Find the latest version of this contact from the list
-    // If not found (deleted), handle gracefully
     final currentContact =
         contactsAsync.value?.where((c) => c.id == contact.id).firstOrNull ??
             contact;
@@ -78,7 +75,6 @@ class ContactDetailScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // Header with Last Contacted
           Card(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Padding(
@@ -162,7 +158,6 @@ class ContactDetailScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
 
-          // Contact Info
           if (currentContact.phoneNumber != null)
             ListTile(
               leading: const Icon(Icons.phone),
@@ -202,7 +197,6 @@ class ContactDetailScreen extends ConsumerWidget {
 
           const Divider(),
 
-          // Notes
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child:
@@ -217,7 +211,6 @@ class ContactDetailScreen extends ConsumerWidget {
 
           const SizedBox(height: 16),
 
-          // Tags
           if (currentContact.tags.isNotEmpty)
             Wrap(
               spacing: 8.0,

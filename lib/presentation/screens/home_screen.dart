@@ -59,7 +59,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Expanded(
             child: contactsAsync.when(
               data: (contacts) {
-                // Filter
                 final filteredContacts = contacts.where((contact) {
                   final nameMatch =
                       contact.name.toLowerCase().contains(_searchQuery);
@@ -68,19 +67,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return nameMatch || tagsMatch;
                 }).toList();
 
-                // Sort: Ascending by lastContacted (nulls first or last? "Longest time" means oldest date first. Null means never contacted, so maybe most urgent?)
-                // Let's say Null = Never contacted = High Urgency (Top).
-                // Then Oldest dates.
-                // Then Newest dates.
                 filteredContacts.sort((a, b) {
                   if (a.lastContacted == null && b.lastContacted == null)
                     return 0;
                   if (a.lastContacted == null)
-                    return -1; // a is null (urgent), b is date
+                    return -1;
                   if (b.lastContacted == null)
-                    return 1; // b is null (urgent), a is date
+                    return 1;
                   return a.lastContacted!
-                      .compareTo(b.lastContacted!); // Ascending: Oldest first
+                      .compareTo(b.lastContacted!);
                 });
 
                 if (filteredContacts.isEmpty) {

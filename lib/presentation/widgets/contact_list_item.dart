@@ -103,7 +103,6 @@ class ContactListItem extends StatelessWidget {
         ),
       );
     } else {
-      // Light Mode (Original Design)
       return Card(
         color: _getUrgencyColor(contact.lastContacted),
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
