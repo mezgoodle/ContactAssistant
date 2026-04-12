@@ -4,9 +4,28 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:contact_assistant/core/router.dart';
 import 'package:contact_assistant/core/utils/mongodb_service.dart';
 import 'package:contact_assistant/providers/theme_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    runApp(const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('Initialization failed. Please restart the app.'),
+        ),
+      ),
+    ));
+    return;
+  }
 
   // Load environment variables
   try {

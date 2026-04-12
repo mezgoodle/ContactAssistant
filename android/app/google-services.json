@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "967138854577",
+    "project_id": "contactassistant-42416",
+    "storage_bucket": "contactassistant-42416.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967138854577:android:5e48a71f2a8fb1867ec490",
+        "android_client_info": {
+          "package_name": "com.example.contact_assistant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANQmAgl2N6WSonXKNQnyhjQq5YH7bgpU8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

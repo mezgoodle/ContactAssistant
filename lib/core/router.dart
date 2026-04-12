@@ -3,7 +3,9 @@ import 'package:contact_assistant/presentation/screens/home_screen.dart';
 import 'package:contact_assistant/presentation/screens/add_edit_contact_screen.dart';
 import 'package:contact_assistant/presentation/screens/contact_detail_screen.dart';
 import 'package:contact_assistant/presentation/screens/settings_screen.dart';
+import 'package:contact_assistant/presentation/screens/networking_guide_screen.dart';
 import 'package:contact_assistant/data/models/contact.dart';
+import 'package:contact_assistant/core/services/ai_notes_service.dart';
 import 'package:flutter/material.dart';
 
 final router = GoRouter(
@@ -41,6 +43,33 @@ final router = GoRouter(
           );
         }
         return ContactDetailScreen(contact: contact);
+      },
+    ),
+    GoRoute(
+      path: '/networking_guide',
+      builder: (context, state) {
+        final extras = state.extra;
+        if (extras is! Map<String, dynamic>) {
+          return const Scaffold(
+            body: Center(
+                child: Text(
+                    'Invalid navigation: Contact and Profile data required')),
+          );
+        }
+        final contact = extras['contact'];
+        final profile = extras['profile'];
+        if (contact is! Contact || profile is! FerrazziProfile) {
+          return const Scaffold(
+            body: Center(
+              child:
+                  Text('Invalid navigation: Contact and Profile data required'),
+            ),
+          );
+        }
+        return NetworkingGuideScreen(
+          contact: contact,
+          profile: profile,
+        );
       },
     ),
     GoRoute(

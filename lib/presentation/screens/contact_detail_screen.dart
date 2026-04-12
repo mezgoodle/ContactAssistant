@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:contact_assistant/data/models/contact.dart';
 import 'package:contact_assistant/logic/providers/contact_provider.dart';
+import 'package:contact_assistant/core/services/ai_notes_service.dart';
 
 class ContactDetailScreen extends ConsumerWidget {
   final Contact contact;
@@ -102,14 +103,58 @@ class ContactDetailScreen extends ConsumerWidget {
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      ref
-                          .read(contactsProvider.notifier)
-                          .markAsContacted(currentContact);
-                    },
-                    icon: const Icon(Icons.check),
-                    label: const Text('Mark as Contacted Today'),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          try {
+                            await ref
+                                .read(contactsProvider.notifier)
+                                .markAsContacted(currentContact);
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Failed to log contact')),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.check),
+                        label: const Text('Contacted'),
+                      ),
+                      FilledButton.icon(
+                        onPressed: () {
+                          if (currentContact.notes == null ||
+                              currentContact.notes!.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      'Please add AI enhanced notes first!')),
+                            );
+                            return;
+                          }
+                          try {
+                            final profile = FerrazziProfile.fromMarkdown(
+                                currentContact.notes!);
+                            context.push('/networking_guide', extra: {
+                              'contact': currentContact,
+                              'profile': profile,
+                            });
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      'Failed to parse profile. Are notes AI enhanced?')),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.auto_awesome),
+                        label: const Text('AI Guide'),
+                      ),
+                    ],
                   ),
                 ],
               ),
