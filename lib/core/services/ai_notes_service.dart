@@ -1,15 +1,10 @@
 import 'dart:convert';
 import 'package:firebase_ai/firebase_ai.dart';
 
-/// Service that uses the Firebase AI (Gemini) API to analyse raw contact notes
-/// and return a structured Markdown profile based on Keith Ferrazzi's
-/// "Never Eat Alone" methodology.
-///
-/// Prerequisites:
-///  - Firebase project connected (google-services.json / GoogleService-Info.plist).
-///  - `Firebase.initializeApp()` called before using this service (see main.dart).
-///  - Gemini API enabled in the Firebase console under AI Logic.
 class AiNotesService {
+  static final AiNotesService _instance = AiNotesService._internal();
+  factory AiNotesService() => _instance;
+
   static const String _systemInstruction =
       "You are an expert networking assistant trained in Keith Ferrazzi's "
       "'Never Eat Alone' methodology. Analyze the raw notes provided by the "
@@ -24,13 +19,13 @@ class AiNotesService {
       "high-impact, open-ended 'Icebreaker' or 'Deepening' questions. These questions "
       "should show genuine interest in the person's 'Blue Flame' (passions), family, "
       "and professional goals. Avoid small talk; aim for questions that lead to an "
-      "emotional connection or offer a chance to be helpful. Respond in Ukrainian. "
+      "emotional connection or offer a chance to be helpful. "
       "Return a JSON object with a key 'questions' containing a list of strings.";
 
   late final GenerativeModel _model;
   late final GenerativeModel _networkingModel;
 
-  AiNotesService() {
+  AiNotesService._internal() {
     _model = FirebaseAI.googleAI().generativeModel(
       model: 'gemini-2.5-flash',
       systemInstruction: Content.system(_systemInstruction),
@@ -57,8 +52,12 @@ class AiNotesService {
       throw Exception('Gemini returned an empty response.');
     }
 
-    final Map<String, dynamic> data =
-        jsonDecode(jsonText) as Map<String, dynamic>;
+    final Map<String, dynamic> data;
+    try {
+      data = jsonDecode(jsonText) as Map<String, dynamic>;
+    } on FormatException catch (e) {
+      throw Exception('Gemini returned invalid JSON: $e');
+    }
     final profile = FerrazziProfile.fromJson(data);
 
     return _formatMarkdown(profile);
@@ -104,7 +103,8 @@ class AiNotesService {
   }
 
   /// Generates 3 networking questions based on the Ferrazzi methodology.
-  Future<List<String>> generateNetworkingQuestions(FerrazziProfile profile) async {
+  Future<List<String>> generateNetworkingQuestions(
+      FerrazziProfile profile) async {
     final response = await _networkingModel.generateContent([
       Content.text(jsonEncode(profile.toJson())),
     ]);
@@ -114,7 +114,8 @@ class AiNotesService {
       throw Exception('Gemini returned an empty response.');
     }
 
-    final Map<String, dynamic> data = jsonDecode(jsonText) as Map<String, dynamic>;
+    final Map<String, dynamic> data =
+        jsonDecode(jsonText) as Map<String, dynamic>;
     final List<dynamic> questions = data['questions'] ?? [];
     return questions.map((e) => e.toString()).toList();
   }

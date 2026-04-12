@@ -48,19 +48,27 @@ final router = GoRouter(
     GoRoute(
       path: '/networking_guide',
       builder: (context, state) {
-        final extras = state.extra as Map<String, dynamic>?;
-        if (extras == null ||
-            !extras.containsKey('contact') ||
-            !extras.containsKey('profile')) {
+        final extras = state.extra;
+        if (extras is! Map<String, dynamic>) {
           return const Scaffold(
             body: Center(
                 child: Text(
                     'Invalid navigation: Contact and Profile data required')),
           );
         }
+        final contact = extras['contact'];
+        final profile = extras['profile'];
+        if (contact is! Contact || profile is! FerrazziProfile) {
+          return const Scaffold(
+            body: Center(
+              child:
+                  Text('Invalid navigation: Contact and Profile data required'),
+            ),
+          );
+        }
         return NetworkingGuideScreen(
-          contact: extras['contact'] as Contact,
-          profile: extras['profile'] as FerrazziProfile,
+          contact: contact,
+          profile: profile,
         );
       },
     ),

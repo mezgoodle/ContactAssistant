@@ -287,7 +287,7 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                 TextFormField(
                   controller: _notesController,
                   decoration: const InputDecoration(
-                      labelText: 'Notes',
+                      hintText: 'Enter notes about this contact...',
                       prefixIcon: Icon(Icons.note),
                       alignLabelWithHint: true),
                   maxLines: 5,

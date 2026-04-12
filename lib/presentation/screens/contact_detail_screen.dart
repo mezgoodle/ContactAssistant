@@ -109,31 +109,45 @@ class ContactDetailScreen extends ConsumerWidget {
                     runSpacing: 8.0,
                     children: [
                       ElevatedButton.icon(
-                        onPressed: () {
-                          ref
-                              .read(contactsProvider.notifier)
-                              .markAsContacted(currentContact);
+                        onPressed: () async {
+                          try {
+                            await ref
+                                .read(contactsProvider.notifier)
+                                .markAsContacted(currentContact);
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Failed to log contact')),
+                            );
+                          }
                         },
                         icon: const Icon(Icons.check),
                         label: const Text('Contacted'),
                       ),
                       FilledButton.icon(
                         onPressed: () {
-                          if (currentContact.notes == null || currentContact.notes!.isEmpty) {
+                          if (currentContact.notes == null ||
+                              currentContact.notes!.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please add AI enhanced notes first!')),
+                              const SnackBar(
+                                  content: Text(
+                                      'Please add AI enhanced notes first!')),
                             );
                             return;
                           }
                           try {
-                            final profile = FerrazziProfile.fromMarkdown(currentContact.notes!);
+                            final profile = FerrazziProfile.fromMarkdown(
+                                currentContact.notes!);
                             context.push('/networking_guide', extra: {
                               'contact': currentContact,
                               'profile': profile,
                             });
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Failed to parse profile. Are notes AI enhanced?')),
+                              const SnackBar(
+                                  content: Text(
+                                      'Failed to parse profile. Are notes AI enhanced?')),
                             );
                           }
                         },

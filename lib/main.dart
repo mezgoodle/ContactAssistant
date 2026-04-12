@@ -11,9 +11,21 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    runApp(const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('Initialization failed. Please restart the app.'),
+        ),
+      ),
+    ));
+    return;
+  }
 
   // Load environment variables
   try {
