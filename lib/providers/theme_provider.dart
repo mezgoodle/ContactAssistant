@@ -11,7 +11,6 @@ class ThemeNotifier extends _$ThemeNotifier {
   @override
   ThemeMode build() {
     _repository = SettingsRepository();
-    // Load theme asynchronously; default to system until resolved.
     _loadTheme();
     return ThemeMode.system;
   }
