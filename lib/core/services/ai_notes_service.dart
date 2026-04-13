@@ -152,8 +152,15 @@ class AiNotesService {
     } on FormatException catch (e) {
       throw Exception('Gemini returned invalid JSON: $e');
     }
-    final List<dynamic> questions = data['questions'] ?? [];
-    return questions.map((e) => e.toString()).toList();
+    final rawQuestions = data['questions'];
+    if (rawQuestions is! List) {
+      throw Exception("Gemini JSON must contain a 'questions' array.");
+    }
+    final questions = rawQuestions
+        .map((e) => e.toString().trim())
+        .where((q) => q.isNotEmpty)
+        .toList();
+    return questions;
   }
 }
 
