@@ -4,6 +4,7 @@ import 'package:contact_assistant/presentation/screens/add_edit_contact_screen.d
 import 'package:contact_assistant/presentation/screens/contact_detail_screen.dart';
 import 'package:contact_assistant/presentation/screens/settings_screen.dart';
 import 'package:contact_assistant/presentation/screens/networking_guide_screen.dart';
+import 'package:contact_assistant/presentation/screens/icebreaker_screen.dart';
 import 'package:contact_assistant/data/models/contact.dart';
 import 'package:contact_assistant/core/services/ai_notes_service.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,10 @@ final router = GoRouter(
     GoRoute(
       path: '/',
       builder: (context, state) => const HomeScreen(),
+    ),
+    GoRoute(
+      path: '/icebreaker',
+      builder: (context, state) => const IcebreakerScreen(),
     ),
     GoRoute(
       path: '/add_contact',
