@@ -13,9 +13,9 @@ class IcebreakerScreen extends StatefulWidget {
 class _IcebreakerScreenState extends State<IcebreakerScreen> {
   final TextEditingController _contextController = TextEditingController();
   List<String> _questions = [
-    "Що зараз забирає найбільше вашої уваги та енергії?",
-    "Якби ви могли змінити одну річ у своїй індустрії, що б це було?",
-    "Що вас найбільше драйвить у вільний час?"
+    "What is currently taking up most of your attention and energy?",
+    "If you could change one thing about your industry, what would it be?",
+    "What do you enjoy doing most in your free time?"
   ];
   bool _isLoading = false;
   String? _error;
@@ -31,6 +31,13 @@ class _IcebreakerScreenState extends State<IcebreakerScreen> {
     if (contextText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a meeting context')),
+      );
+      return;
+    }
+    if (contextText.length > 500) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Please keep context under 500 characters')),
       );
       return;
     }
@@ -90,6 +97,7 @@ class _IcebreakerScreenState extends State<IcebreakerScreen> {
                     border: OutlineInputBorder(),
                   ),
                   maxLines: null,
+                  maxLength: 500,
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
@@ -135,7 +143,8 @@ class _IcebreakerScreenState extends State<IcebreakerScreen> {
                                 children: [
                                   Icon(
                                     _getIconForQuestion(),
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                     size: 28,
                                   ),
                                   const SizedBox(width: 16),
@@ -166,7 +175,7 @@ class _IcebreakerScreenState extends State<IcebreakerScreen> {
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton.icon(
             onPressed: () {
-               context.push('/add_contact');
+              context.push('/add_contact');
             },
             icon: const Icon(Icons.add),
             label: const Text('Add as New Contact'),
