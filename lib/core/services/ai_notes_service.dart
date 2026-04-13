@@ -22,8 +22,16 @@ class AiNotesService {
       "emotional connection or offer a chance to be helpful. "
       "Return a JSON object with a key 'questions' containing a list of strings.";
 
+  static const String _icebreakerInstruction =
+      "You are an expert networker like Keith Ferrazzi. The user is about to meet someone new. "
+      "The context of the meeting is provided by the user. Generate 4 highly engaging, authentic "
+      "icebreaker questions to start the conversation. AVOID boring questions like 'What do you do?'. "
+      "Focus on finding their 'Blue Flame' (passions), current challenges, or personal stories. "
+      "Return a JSON object with a key 'questions' containing a list of strings.";
+
   late final GenerativeModel _model;
   late final GenerativeModel _networkingModel;
+  late final GenerativeModel _icebreakerModel;
 
   AiNotesService._internal() {
     _model = FirebaseAI.googleAI().generativeModel(
@@ -36,6 +44,13 @@ class AiNotesService {
     _networkingModel = FirebaseAI.googleAI().generativeModel(
       model: 'gemini-2.5-flash',
       systemInstruction: Content.system(_networkingInstruction),
+      generationConfig: GenerationConfig(
+        responseMimeType: 'application/json',
+      ),
+    );
+    _icebreakerModel = FirebaseAI.googleAI().generativeModel(
+      model: 'gemini-2.5-flash',
+      systemInstruction: Content.system(_icebreakerInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
       ),
@@ -119,7 +134,29 @@ class AiNotesService {
     final List<dynamic> questions = data['questions'] ?? [];
     return questions.map((e) => e.toString()).toList();
   }
+
+  /// Generates 4 icebreaker questions for a new encounter.
+  Future<List<String>> generateIcebreakers(String context) async {
+    final response = await _icebreakerModel.generateContent([
+      Content.text(context),
+    ]);
+
+    final jsonText = response.text;
+    if (jsonText == null || jsonText.trim().isEmpty) {
+      throw Exception('Gemini returned an empty response.');
+    }
+
+    final Map<String, dynamic> data;
+    try {
+      data = jsonDecode(jsonText) as Map<String, dynamic>;
+    } on FormatException catch (e) {
+      throw Exception('Gemini returned invalid JSON: $e');
+    }
+    final List<dynamic> questions = data['questions'] ?? [];
+    return questions.map((e) => e.toString()).toList();
+  }
 }
+
 
 class FerrazziProfile {
   final String family;

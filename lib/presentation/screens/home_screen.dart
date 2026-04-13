@@ -31,6 +31,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: const Text('Personal CRM'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.lightbulb),
+            tooltip: 'New Acquaintance Guide',
+            onPressed: () {
+              context.push('/icebreaker');
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
               context.push('/settings');
