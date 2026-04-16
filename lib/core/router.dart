@@ -5,6 +5,7 @@ import 'package:contact_assistant/presentation/screens/contact_detail_screen.dar
 import 'package:contact_assistant/presentation/screens/settings_screen.dart';
 import 'package:contact_assistant/presentation/screens/networking_guide_screen.dart';
 import 'package:contact_assistant/presentation/screens/icebreaker_screen.dart';
+import 'package:contact_assistant/presentation/screens/chat_analyzer_screen.dart';
 import 'package:contact_assistant/data/models/contact.dart';
 import 'package:contact_assistant/core/services/ai_notes_service.dart';
 import 'package:flutter/material.dart';
@@ -80,6 +81,19 @@ final router = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/chat_analyzer',
+      builder: (context, state) {
+        final contact = state.extra;
+        if (contact is! Contact) {
+          return const Scaffold(
+            body: Center(
+                child: Text('Invalid navigation: Contact data required')),
+          );
+        }
+        return ChatAnalyzerScreen(contact: contact);
+      },
     ),
   ],
 );

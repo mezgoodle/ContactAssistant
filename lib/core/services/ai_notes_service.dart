@@ -29,28 +29,48 @@ class AiNotesService {
       "Focus on finding their 'Blue Flame' (passions), current challenges, or personal stories. "
       "Return a JSON object with a key 'questions' containing a list of strings.";
 
+  static const String _conversationInstruction =
+      "You are an expert conversation analyst. Your task is to read the provided chat log "
+      "and extract information to fill a structured profile based on Keith Ferrazzi's methodology. "
+      "Identify personal details (family), passions (hobbies), professional goals, preferences, "
+      "and most importantly, any commitments or action items discussed. "
+      "The user of this app is one of the participants. Analyze the conversation from their perspective. "
+      "Respond in Ukrainian. Return a JSON object with keys: 'family_and_personal' (string), "
+      "'passions_and_hobbies' (array of strings), 'professional_goals' (string), "
+      "'preferences' (string), 'actionable_help' (string). "
+      "The 'actionable_help' field should contain specific next steps, commitments, and action items "
+      "discussed in the conversation, formatted as a bulleted list.";
+
   late final GenerativeModel _model;
   late final GenerativeModel _networkingModel;
   late final GenerativeModel _icebreakerModel;
+  late final GenerativeModel _conversationModel;
 
   AiNotesService._internal() {
     _model = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite-preview',
       systemInstruction: Content.system(_systemInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
       ),
     );
     _networkingModel = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite-preview',
       systemInstruction: Content.system(_networkingInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
       ),
     );
     _icebreakerModel = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite-preview',
       systemInstruction: Content.system(_icebreakerInstruction),
+      generationConfig: GenerationConfig(
+        responseMimeType: 'application/json',
+      ),
+    );
+    _conversationModel = FirebaseAI.googleAI().generativeModel(
+      model: 'gemini-3.1-flash-lite-preview',
+      systemInstruction: Content.system(_conversationInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
       ),
@@ -75,10 +95,29 @@ class AiNotesService {
     }
     final profile = FerrazziProfile.fromJson(data);
 
-    return _formatMarkdown(profile);
+    return formatMarkdown(profile);
   }
 
-  String _formatMarkdown(FerrazziProfile profile) {
+  /// Analyzes a raw chat log and extracts a [FerrazziProfile].
+  Future<FerrazziProfile> analyzeConversation(String chatLog) async {
+    final response =
+        await _conversationModel.generateContent([Content.text(chatLog)]);
+
+    final jsonText = response.text;
+    if (jsonText == null || jsonText.trim().isEmpty) {
+      throw Exception('Gemini returned an empty response.');
+    }
+
+    final Map<String, dynamic> data;
+    try {
+      data = jsonDecode(jsonText) as Map<String, dynamic>;
+    } on FormatException catch (e) {
+      throw Exception('Gemini returned invalid JSON: $e');
+    }
+    return FerrazziProfile.fromJson(data);
+  }
+
+  String formatMarkdown(FerrazziProfile profile) {
     final buffer = StringBuffer();
 
     final family = profile.family.trim();
@@ -163,7 +202,6 @@ class AiNotesService {
     return questions;
   }
 }
-
 
 class FerrazziProfile {
   final String family;

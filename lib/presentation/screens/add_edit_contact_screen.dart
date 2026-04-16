@@ -271,17 +271,43 @@ class _AddEditContactScreenState extends ConsumerState<AddEditContactScreen> {
                       'Notes',
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
-                    _isEnhancingNotes
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : IconButton(
-                            icon: const Icon(Icons.auto_awesome),
-                            tooltip: 'Enhance with AI (Ferrazzi method)',
-                            onPressed: _enhanceNotes,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (widget.contact != null)
+                          IconButton(
+                            icon: const Icon(Icons.chat_bubble_outline),
+                            tooltip: 'Import & Analyze Chat',
+                            onPressed: () async {
+                              final result = await context.push<Contact>(
+                                '/chat_analyzer',
+                                extra: widget.contact!.copyWith(
+                                  notes: _notesController.text.trim().isEmpty
+                                      ? null
+                                      : _notesController.text.trim(),
+                                ),
+                              );
+                              if (result != null && mounted) {
+                                setState(() {
+                                  _notesController.text = result.notes ?? '';
+                                });
+                              }
+                            },
                           ),
+                        _isEnhancingNotes
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : IconButton(
+                                icon: const Icon(Icons.auto_awesome),
+                                tooltip: 'Enhance with AI (Ferrazzi method)',
+                                onPressed: _enhanceNotes,
+                              ),
+                      ],
+                    ),
                   ],
                 ),
                 TextFormField(
