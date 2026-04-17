@@ -35,7 +35,7 @@ class AiNotesService {
       "Identify personal details (family), passions (hobbies), professional goals, preferences, "
       "and most importantly, any commitments or action items discussed. "
       "The user of this app is one of the participants. Analyze the conversation from their perspective. "
-      "Respond in Ukrainian. Return a JSON object with keys: 'family_and_personal' (string), "
+      "Return a JSON object with keys: 'family_and_personal' (string), "
       "'passions_and_hobbies' (array of strings), 'professional_goals' (string), "
       "'preferences' (string), 'actionable_help' (string). "
       "The 'actionable_help' field should contain specific next steps, commitments, and action items "
@@ -95,8 +95,7 @@ class AiNotesService {
               nullable: true,
             ),
             'actionable_help': Schema.string(
-              description:
-                  'Specific next steps, commitments, and action items',
+              description: 'Specific next steps, commitments, and action items',
               nullable: true,
             ),
           },
@@ -138,7 +137,11 @@ class AiNotesService {
 
     final Map<String, dynamic> data;
     try {
-      data = jsonDecode(jsonText) as Map<String, dynamic>;
+      final decoded = jsonDecode(jsonText);
+      if (decoded is! Map<String, dynamic>) {
+        throw Exception('Gemini returned invalid JSON: $decoded');
+      }
+      data = decoded;
     } on FormatException catch (e) {
       throw Exception('Gemini returned invalid JSON: $e');
     }
