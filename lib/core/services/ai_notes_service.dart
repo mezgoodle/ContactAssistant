@@ -46,33 +46,61 @@ class AiNotesService {
   late final GenerativeModel _icebreakerModel;
   late final GenerativeModel _conversationModel;
 
+  static const modelName = 'gemini-3.1-flash-lite-preview';
+
   AiNotesService._internal() {
     _model = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-3.1-flash-lite-preview',
+      model: modelName,
       systemInstruction: Content.system(_systemInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
       ),
     );
     _networkingModel = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-3.1-flash-lite-preview',
+      model: modelName,
       systemInstruction: Content.system(_networkingInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
       ),
     );
     _icebreakerModel = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-3.1-flash-lite-preview',
+      model: modelName,
       systemInstruction: Content.system(_icebreakerInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
       ),
     );
     _conversationModel = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-3.1-flash-lite-preview',
+      model: modelName,
       systemInstruction: Content.system(_conversationInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
+        responseSchema: Schema.object(
+          properties: {
+            'family_and_personal': Schema.string(
+              description: 'Personal and family details',
+              nullable: true,
+            ),
+            'passions_and_hobbies': Schema.array(
+              items: Schema.string(),
+              description: 'List of passions and hobbies',
+              nullable: true,
+            ),
+            'professional_goals': Schema.string(
+              description: 'Professional goals and career aspirations',
+              nullable: true,
+            ),
+            'preferences': Schema.string(
+              description: 'Personal preferences (food, drinks, meeting style)',
+              nullable: true,
+            ),
+            'actionable_help': Schema.string(
+              description:
+                  'Specific next steps, commitments, and action items',
+              nullable: true,
+            ),
+          },
+        ),
       ),
     );
   }
@@ -219,15 +247,23 @@ class FerrazziProfile {
   });
 
   factory FerrazziProfile.fromJson(Map<String, dynamic> json) {
+    // Coerce passions_and_hobbies: accept List, String (→ singleton), or missing.
+    final rawPassions = json['passions_and_hobbies'];
+    final List<String> passions;
+    if (rawPassions is List) {
+      passions = rawPassions.map((e) => e.toString()).toList();
+    } else if (rawPassions is String && rawPassions.isNotEmpty) {
+      passions = [rawPassions];
+    } else {
+      passions = [];
+    }
+
     return FerrazziProfile(
-      family: json['family_and_personal'] ?? '',
-      passions: (json['passions_and_hobbies'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      goals: json['professional_goals'] ?? '',
-      preferences: json['preferences'] ?? '',
-      actionableHelp: json['actionable_help'] ?? '',
+      family: (json['family_and_personal'] ?? '').toString(),
+      passions: passions,
+      goals: (json['professional_goals'] ?? '').toString(),
+      preferences: (json['preferences'] ?? '').toString(),
+      actionableHelp: (json['actionable_help'] ?? '').toString(),
     );
   }
 
