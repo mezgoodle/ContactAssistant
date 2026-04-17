@@ -150,6 +150,13 @@ class ContactDetailScreen extends ConsumerWidget {
                         icon: const Icon(Icons.auto_awesome),
                         label: const Text('AI Guide'),
                       ),
+                      FilledButton.tonalIcon(
+                        onPressed: () {
+                          context.push('/chat_analyzer', extra: currentContact);
+                        },
+                        icon: const Icon(Icons.chat_bubble_outline),
+                        label: const Text('Import Chat'),
+                      ),
                     ],
                   ),
                 ],

@@ -29,30 +29,77 @@ class AiNotesService {
       "Focus on finding their 'Blue Flame' (passions), current challenges, or personal stories. "
       "Return a JSON object with a key 'questions' containing a list of strings.";
 
+  static const String _conversationInstruction =
+      "You are an expert conversation analyst. Your task is to read the provided chat log "
+      "and extract information to fill a structured profile based on Keith Ferrazzi's methodology. "
+      "Identify personal details (family), passions (hobbies), professional goals, preferences, "
+      "and most importantly, any commitments or action items discussed. "
+      "The user of this app is one of the participants. Analyze the conversation from their perspective. "
+      "Return a JSON object with keys: 'family_and_personal' (string), "
+      "'passions_and_hobbies' (array of strings), 'professional_goals' (string), "
+      "'preferences' (string), 'actionable_help' (string). "
+      "The 'actionable_help' field should contain specific next steps, commitments, and action items "
+      "discussed in the conversation, formatted as a bulleted list.";
+
   late final GenerativeModel _model;
   late final GenerativeModel _networkingModel;
   late final GenerativeModel _icebreakerModel;
+  late final GenerativeModel _conversationModel;
+
+  static const modelName = 'gemini-3.1-flash-lite-preview';
 
   AiNotesService._internal() {
     _model = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-2.5-flash',
+      model: modelName,
       systemInstruction: Content.system(_systemInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
       ),
     );
     _networkingModel = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-2.5-flash',
+      model: modelName,
       systemInstruction: Content.system(_networkingInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
       ),
     );
     _icebreakerModel = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-2.5-flash',
+      model: modelName,
       systemInstruction: Content.system(_icebreakerInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
+      ),
+    );
+    _conversationModel = FirebaseAI.googleAI().generativeModel(
+      model: modelName,
+      systemInstruction: Content.system(_conversationInstruction),
+      generationConfig: GenerationConfig(
+        responseMimeType: 'application/json',
+        responseSchema: Schema.object(
+          properties: {
+            'family_and_personal': Schema.string(
+              description: 'Personal and family details',
+              nullable: true,
+            ),
+            'passions_and_hobbies': Schema.array(
+              items: Schema.string(),
+              description: 'List of passions and hobbies',
+              nullable: true,
+            ),
+            'professional_goals': Schema.string(
+              description: 'Professional goals and career aspirations',
+              nullable: true,
+            ),
+            'preferences': Schema.string(
+              description: 'Personal preferences (food, drinks, meeting style)',
+              nullable: true,
+            ),
+            'actionable_help': Schema.string(
+              description: 'Specific next steps, commitments, and action items',
+              nullable: true,
+            ),
+          },
+        ),
       ),
     );
   }
@@ -75,10 +122,33 @@ class AiNotesService {
     }
     final profile = FerrazziProfile.fromJson(data);
 
-    return _formatMarkdown(profile);
+    return formatMarkdown(profile);
   }
 
-  String _formatMarkdown(FerrazziProfile profile) {
+  /// Analyzes a raw chat log and extracts a [FerrazziProfile].
+  Future<FerrazziProfile> analyzeConversation(String chatLog) async {
+    final response =
+        await _conversationModel.generateContent([Content.text(chatLog)]);
+
+    final jsonText = response.text;
+    if (jsonText == null || jsonText.trim().isEmpty) {
+      throw Exception('Gemini returned an empty response.');
+    }
+
+    final Map<String, dynamic> data;
+    try {
+      final decoded = jsonDecode(jsonText);
+      if (decoded is! Map<String, dynamic>) {
+        throw Exception('Gemini returned invalid JSON: $decoded');
+      }
+      data = decoded;
+    } on FormatException catch (e) {
+      throw Exception('Gemini returned invalid JSON: $e');
+    }
+    return FerrazziProfile.fromJson(data);
+  }
+
+  String formatMarkdown(FerrazziProfile profile) {
     final buffer = StringBuffer();
 
     final family = profile.family.trim();
@@ -164,7 +234,6 @@ class AiNotesService {
   }
 }
 
-
 class FerrazziProfile {
   final String family;
   final List<String> passions;
@@ -181,15 +250,23 @@ class FerrazziProfile {
   });
 
   factory FerrazziProfile.fromJson(Map<String, dynamic> json) {
+    // Coerce passions_and_hobbies: accept List, String (→ singleton), or missing.
+    final rawPassions = json['passions_and_hobbies'];
+    final List<String> passions;
+    if (rawPassions is List) {
+      passions = rawPassions.map((e) => e.toString()).toList();
+    } else if (rawPassions is String && rawPassions.isNotEmpty) {
+      passions = [rawPassions];
+    } else {
+      passions = [];
+    }
+
     return FerrazziProfile(
-      family: json['family_and_personal'] ?? '',
-      passions: (json['passions_and_hobbies'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      goals: json['professional_goals'] ?? '',
-      preferences: json['preferences'] ?? '',
-      actionableHelp: json['actionable_help'] ?? '',
+      family: (json['family_and_personal'] ?? '').toString(),
+      passions: passions,
+      goals: (json['professional_goals'] ?? '').toString(),
+      preferences: (json['preferences'] ?? '').toString(),
+      actionableHelp: (json['actionable_help'] ?? '').toString(),
     );
   }
 
